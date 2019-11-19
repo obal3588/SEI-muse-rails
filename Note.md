@@ -1,6 +1,6 @@
 1.rails new muse -d postgresql  //create a rails obj with postgresql data base 
 2.rails db:create //create new DB it should be two
-3.rails db:migrate 
+3.rails db:migrate  //t
 5.rails c 
     1.rails Artist.count
     2. Artist.all
@@ -63,7 +63,7 @@
 21.add artist.rb  /muse/app/models/artist.rb  
   //dependent is key destroy is symble //artist has meny songs relationship 
     '''has_many :songs, dependent: :destroy'''
-22.replace all the code in seeds.rb     /home/obaid/sei/projects/muse/db/seeds.rb 
+22.replace all the code in seeds.rb     /muse/db/seeds.rb 
     -- since we drop two artist .we will drop all DBs and recreate it using next command  
 
     '''
@@ -80,16 +80,229 @@
     Song.create(artist_id: 5, title: "Lemonade", genre: "R&B")
     '''
 23.rails db:drop db:create db:migrate db:seed  //4 commands once 
+    --if you got error
+    1.psql
+     1.\c muse_development
+        1.SELECT pid, pg_terminate_backend(pid) 
+          FROM pg_stat_activity 
+          WHERE datname = current_database() AND pid <> pg_backend_pid();
 24. rails c // to check 
+    //songs should not be exsist if no artist 
     1.Artist.count # 5
     2.Song.count  # 5
-    3. rihanna =Artist.first 
+    3.rihanna =Artist.first 
     4.rihanna
     5.rihanna.Songs 
+    6.diamonds=rihanna.songs.new   //song not capital s since it is obj inside obj    
+    7.diamonds.title='Diamonds'
+    8.diamonds.save
+    9.rihanna.songs  //to check songs "s" is small 
+    10.rihanna.songs.create(title:"Work") //use create
+    11.rihanna.songs.find_by_title('Diamonds')
+    12.rihanna.songs[1].update(genre: "Gospel")
+    13.rihanna.songs
+    14.diamonds = rihanna.songs.find_by_title('Diamonds')
+    15.Song.count  #7
+    16.diamonds.destroy 
+    17.Song.count  #6
 
+//afternoon 
+* we have two models songs and artits 
+resource 
+1.go routes  write and save these two line 
+    '''
+      root 'artists#index'
+     resources :artists  //refire to
+  '''
+2.rails routes //to check 
+
+3.rails g controller artists //controller with polural  module singler 
+4. add to /muse/app/controllers/artists_controller.rb  
+```
+ def index 
+      @artists = Artist.all  
+  end
+
+```
+5.create index.html.rb inside muse/app/views/artists/index.html.erb
  
+ '''
+ <h1>All the Artists</h1>
 
-    
+<table class="striped bordered">
+  <tr>
+    <th>Artist</th>
+    <th>Image</th>
+    <th>Albums</th>
+    <th>Hometown</th>
+  </tr>
+
+  <% @artists.each do |artist| %>
+      <tr>
+        <td><%= link_to artist.name, artist_path(artist) %></td>
+        <td><%= image_tag(artist.img, size: "100x100", alt: "Artist Image") %></td>
+        <td><%= artist.albums %></td>
+        <td><%= artist.hometown %></td>
+      </tr>
+  <% end %>
+</table>
+
+'''
+ click on artists get error there is no show action  
+
+ 7. add show methods  /muse/app/controllers/artists_controller.rb 
+ '''
+ def show
+  @artist = Artist.find(params[:id])
+  @songs = @artist.songs
+end
+ 
+ '''
+
+8.create show.html.erb in /muse/app/views/artists/
+'''
+    <h1><%= @artist.name %> Songs</h1>
+    <%= link_to "New Song", new_song_path(:artist_id => @artist.id), { :class => "button waves-effect waves-light btn" } %>
+    <br><br>
+
+    <div class="row">
+    <% @songs.each do |song| %>
+
+        <div class="card-panel grey lighten-2 col s4" style="margin: 10px">
+            <%= image_tag(@artist.img, size: "100x100", alt: "Artist Image") %>
+            <br>
+            <strong><%= link_to song.title %></strong>
+            <em><%= song.genre %></em>
+        </div>
+    <% end %>
+    </div>
+
+'''
+will get error 
+9.edit routes
+'''
+    root 'artists#index'
+    resources :artists, :songs
+  '''
+
+10.edit /muse/app/controllers/artists_controller.rb
+'''
+  ##create an obj that view can fill it and edit ,than call create action methouds
+  def new
+    @artist = Artist.new
+end
+
+'''
+11. create _form.html.erb /muse/app/views/artists/_form.html.erb  // using "_" in file name to be hidden 
+and write 
+
+اسال كيف يكلم كرييت 
+```
+
+<%= form_for @artist do |f| %>
+  <div class="input-field col s6">
+      <%= f.label :name, 'Name'%>
+      <%= f.text_field :name%>
+  </div>
+  <div class="input-field col s6">
+      <%= f.label :albums, 'Albums' %>
+      <%= f.text_field :albums %>
+  </div>
+  <div class="input-field col s6">
+      <%= f.label :hometown, 'Hometown' %>
+      <%= f.text_field :hometown %>
+  </div>
+  <div class="input-field col s6">
+      <%= f.label :img, 'Image' %>
+      <%= f.text_field :img %>
+  </div>
+  <%= f.submit "Submit", :class => "btn waves-effect waves-light" %>
+<% end %>
+
+```
+12.create new.html.erb 
+'''
+<h1>New Artist</h1>
+
+<%= render 'artists/form' %>
+
+'''
+
+13. add to index.html.erb to create linker on the page 
+'''
+ <%= link_to "Add an Artist", new_artist_path, { :class => "button waves-effect waves-light btn" } %>
+<br>
+'''
+
+14. add create action to /muse/app/controllers/artists_controller.rb 
+    --needs parmas that comes from new 
+    -- since it is post needs permission to op on DB 
+    --debugging use params in browser 
+
+```
+def create
+  Artist.create(params.require(:artist).permit(:name, :albums, :hometown, :img))
+  redirect_to artists_path
+end
+    ```
+15.rails routs //to check all gets req for new artist
+16. update and add  /muse/app/controllers/artists_controller.rb
+'''
+   def edit
+        @artist = Artist.find(params[:id])
+    end
+    '''
+17.create and add code to  edit.html.erb /muse/app/views/artists/edit.html.erb
+```
+<h1>Edit <%= @artist.name %></h1>
+
+<%= render 'artists/form' %>
+```
+18. add and edit index.html.erb
+```
+<h1>All the Artists</h1>
+<%= link_to "Add an Artist", new_artist_path, { :class => "button waves-effect waves-light btn" } %>
+<br><br>
+
+<table class="striped bordered">
+  <tr>
+    <th>Artist</th>
+    <th>Image</th>
+    <th>Albums</th>
+    <th>Hometown</th>
+    <th>Edit</th>
+  </tr>
+
+  <% @artists.each do |artist| %>
+      <tr>
+        <td><%= link_to artist.name, artist_path(artist) %></td>
+        <td><%= image_tag(artist.img, size: "100x100", alt: "Artist Image") %></td>
+        <td><%= artist.albums %></td>
+        <td><%= artist.hometown %></td>
+        <td><a class="btn-floating btn-large red" href="<%= edit_artist_path(artist) %>" >
+           <em class="large material-icons">Edit Artist</em>
+          </a>
+        </td>
+      </tr>
+  <% end %>
+</table>
+
+```
+
+19. add update action to /muse/app/controllers/artists_controller.rb
+```
+  def update
+      artist = Artist.find(params[:id])
+      artist.update(params.require(:artist).permit(:name, :albums, :hometown, :img))   
+      redirect_to artist
+      
+    end 
+```
+
+20.
+
+
+
 
 
 -------------------------------
@@ -102,3 +315,21 @@ risk of routing is way to  ضسعت اساله
 modle we can put our condation 
 it is safe if we have two layers of securoty one in model and the other in DB
 
+gem install prettyprint //مهم
+
+
+--------------------------------
+rails confantion 
+put patch ==>for updata 
+browser ->(http req ,url) web server->public 
+
+
+## Standard Controller Actions
+    resource : https://www.codecademy.com/articles/standard-controller-actions
+
+
+مخفس
+http
+
+erb 
+params
