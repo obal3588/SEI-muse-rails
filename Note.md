@@ -1,7 +1,7 @@
-1.rails new muse -d postgresql  //create a rails obj with postgresql data base 
-2.rails db:create //create new DB it should be two
-3.rails db:migrate  //t
-5.rails c 
+1. rails new muse -d postgresql  //create a rails obj with postgresql data base 
+2. rails db:create //create new DB it should be two
+3. rails db:migrate  //t
+5. rails c 
     1.rails Artist.count
     2. Artist.all
     3. a = Artist.new( name:"Obaid", hometown:"Riyadh" ,img:"",albums:2) //does not save in db yet  
