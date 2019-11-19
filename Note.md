@@ -348,7 +348,71 @@ end
 ```
 
 ############ Work on song modle #######
+    DB song
+        title
+        Genre
+show(params)=>new(params)=>_form(params)=>create(params)
+  
+  / ملاحضة في الكنترول حاول تسوي خطاء عشان تستخدم        
+بارمس وتعرف كل المتغيرات الي دخلت على الاكشن 
 
+ new get proms transfare it to form and create take proms from form
+1. rails g  controller songs
+2. edit  songs_controller.rb    /muse/app/controllers/songs_controller.rb  
+    --sequence of params "Ask TA to make sure "
+        ---show.html=>new.html=>songform.html =>where can create action use it 
+    -- use console that show up in the browser for debugging also for params
+```
+  def new
+    @artist = Artist.find(params[:artist_id])
+    @song = Song.new
+  end
+
+  def create
+    artist = Artist.find(params[:song][:artist_id])
+    Song.create(params.require(:song).permit(:title, :genre, :artist_id))
+    redirect_to artist
+  end
+
+```
+3.create dir view and create  new.html.erb inside it   
+```
+<h1>New Song for <%= @artist.name %></h1>
+
+<%= render 'songs/form' %>
+
+```
+4.create  _form.html.erb and edit   /muse/app/controllers/songs_controller.rb
+    --file start with "_" symbol is hidden 
+    --
+    ```
+    <%= form_for @song do |f| %>
+  <%= f.hidden_field :artist_id, :value => @artist.id %>
+  <div class="input-field col s6">
+      <%= f.label :title, 'Title' %>
+      <%= f.text_field :title %>
+  </div>
+  <div class="input-field col s6">
+      <%= f.label :genre, 'Genre' %>
+      <%= f.text_field :genre %>
+  </div>
+  <%= f.submit "Submit", :class => "btn waves-effect waves-light" %>
+<% end %>
+
+```
+
+5.edit /muse/app/controllers/artists_controller.rb
+//add order method to organize the list
+```
+Artist.all.order('name') 
+``` 
+6.edit artists_controller.rb
+    -- take advantage of private by making this line in a method that is called each time instead of 
+    ```
+                params.require(:artist).permit(:name, :albums, :hometown, :img)
+
+``` 
+ 
 -------------------------------
 
 ## seeds.rb  
