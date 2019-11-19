@@ -28,4 +28,10 @@ class ArtistsController < ApplicationController
     artist.update(params.require(:artist).permit(:name, :albums, :hometown, :img))
     redirect_to artists_path
   end
+
+  def destroy
+    Artist.find(params[:id]).destroy
+
+    redirect_to artists_path
+  end
 end

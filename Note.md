@@ -299,11 +299,55 @@ end
     end 
 ```
 
-20.
+20. add destroy action and update muse/app/controllers/artists_controller.rb
+    ```
+def destroy
+  Artist.find(params[:id]).destroy
+
+  redirect_to artists_path ## since it is not react we need to redirict 
+end
+
+    ```
 
 
+21. add and update index.html.erb // for destroy 
+    --- data-method  is importent 
+```
 
+<h1>All the Artists</h1>
+<%= link_to "Add an Artist", new_artist_path, { :class => "button waves-effect waves-light btn" } %>
+<br><br>
 
+<table class="striped bordered">
+  <tr>
+    <th>Artist</th>
+    <th>Image</th>
+    <th>Albums</th>
+    <th>Hometown</th>
+    <th>Edit</th>
+    <th>Delete</th>
+  </tr>
+
+  <% @artists.each do |artist| %>
+      <tr>
+        <td><%= link_to artist.name, artist_path(artist) %></td>
+        <td><%= image_tag(artist.img, size: "100x100", alt: "Artist Image") %></td>
+        <td><%= artist.albums %></td>
+        <td><%= artist.hometown %></td>
+        <td><a class="btn-floating btn-large red" href="<%= edit_artist_path(artist) %>" >
+                      <i class="large material-icons">mode_edit</i>
+                </a>
+          </td>
+        <td><a class="btn-floating btn-large red" data-confirm="Are you sure you want to delete <%= artist.name %>?" data-method="delete" href="/artists/<%= artist.id %>" rel="nofollow"><i class="large material-icons">Delete Artist</i>
+           </a>
+        </td>
+      </tr>
+  <% end %>
+</table>
+
+```
+
+############ Work on song modle #######
 
 -------------------------------
 
